@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             <>
               <p>
                 When you use the Chrome extension, TabZero reads the current
-                Chrome window's HTTP and HTTPS tab titles, URLs, active-tab
+                Chrome window&apos;s HTTP and HTTPS tab titles, URLs, active-tab
                 state, and favicon URLs. It sends those fields to the configured
                 TabZero web app only when you click Analyze My Tabs.
               </p>
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
           title: "Chrome Web Store Limited Use Disclosure",
           body: (
             <p>
-              TabZero's use and transfer of information received from Chrome
+              TabZero&apos;s use and transfer of information received from Chrome
               extension APIs is limited to providing and improving the
               user-facing tab organization feature. TabZero does not transfer
               Chrome extension user data to data brokers, information resellers,

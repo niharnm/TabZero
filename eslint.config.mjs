@@ -5,5 +5,12 @@ import nextTs from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", ".tabzero-data/**", "node_modules/**", "out/**"]),
+  globalIgnores([
+    ".next/**",
+    ".tabzero-data/**",
+    "extension/dist/**",
+    "desktop/**",
+    "node_modules/**",
+    "out/**",
+  ]),
 ]);

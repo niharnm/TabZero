@@ -15,7 +15,7 @@ export default function ExtensionDisclosuresPage() {
         <>
           <p>Effective date: June 13, 2026</p>
           <p>
-            This page summarizes the TabZero Chrome extension's single purpose,
+            This page summarizes the TabZero Chrome extension&apos;s single purpose,
             permissions, and data handling in plain English.
           </p>
         </>
@@ -48,7 +48,7 @@ export default function ExtensionDisclosuresPage() {
                       tabs
                     </td>
                     <td className="py-3 pr-4">
-                      Reads the current window's HTTP and HTTPS tab titles,
+                      Reads the current window&apos;s HTTP and HTTPS tab titles,
                       URLs, active state, and favicon URLs when you use the
                       popup.
                     </td>
