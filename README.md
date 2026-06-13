@@ -14,10 +14,15 @@ TabZero/            # repo root = the Next.js web app (deployed to Vercel)
   components/
   lib/
   extension/        # Chrome extension (not part of the web deploy)
+  desktop/          # Tauri native app — macOS .dmg (not part of the web deploy)
+  .github/          # CI: builds the macOS .dmg + extension .zip on a release tag
   vercel.json       # framework: nextjs
-  .vercelignore     # excludes extension/ from deploys
+  .vercelignore     # excludes extension/, desktop/, .github/ from deploys
   README.md
 ```
+
+TabZero ships in two installable forms (see the `/download` page): a **Chrome
+extension** and a **native macOS app**.
 
 ## How it works
 
@@ -161,6 +166,42 @@ The web API is stable and CORS-enabled, so the extension only needs to POST tabs
 5. Load the unpacked build for testing: `chrome://extensions` → Developer Mode → **Load unpacked** → select `extension/dist`.
 
 Keep the manifest host permissions aligned with the deployed API origin (e.g. `https://*.vercel.app/*` and `http://localhost:3000/*`).
+
+## macOS desktop app
+
+The `desktop/` folder is a [Tauri v2](https://tauri.app) shell that opens the
+TabZero dashboard in a native macOS window with a menu-bar icon. It points at the
+deployed web app, so the dashboard UI is identical to the website.
+
+**Releases are built in CI** (a macOS runner — a `.dmg` cannot be compiled on
+Windows/Linux). To cut a release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+`.github/workflows/release.yml` then:
+
+1. generates app icons, injects your deployed URL (repo variable `TABZERO_APP_URL`, default `https://tabzero.app`),
+2. builds the universal macOS `.dmg`,
+3. builds the extension and zips it,
+4. publishes both to a GitHub Release.
+
+The `/download` page's "Download for macOS" button links to
+`releases/latest` (override with `NEXT_PUBLIC_MACOS_DOWNLOAD_URL`). The build is
+**unsigned** by default — first launch is right-click → **Open**. To sign &
+notarize, add Apple Developer secrets and the corresponding `tauri-action` env
+vars.
+
+Build locally on a Mac with Rust + Node installed:
+
+```bash
+cd desktop
+npm install
+npm run tauri icon icon-source.png   # generate icons from a 1024px source
+npm run tauri build
+```
 
 ## Privacy
 

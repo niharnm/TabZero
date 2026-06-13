@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TabZero</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0a0a0c;
+        color: #cbd5e1;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      }
+      .wrap {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        gap: 0.75rem;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #7c3aed;
+        animation: pulse 1.2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; }
+        50% { opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="dot"></div>
+      <div>Opening TabZero…</div>
+    </div>
+    <script>
+      // The deployed TabZero web URL. CI replaces the __TABZERO_URL__ token with
+      // the value of the TABZERO_APP_URL repo variable; otherwise the default is used.
+      var url = "__TABZERO_URL__";
+      if (!url || url.indexOf("__TABZERO") === 0) {
+        url = "https://tabzero.app";
+      }
+      location.replace(url);
+    </script>
+  </body>
+</html>

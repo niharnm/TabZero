@@ -9,7 +9,7 @@ import {
   Trash2,
   ShieldCheck,
   Wand2,
-  Puzzle,
+  Download,
   Archive,
 } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -75,8 +75,6 @@ function BigFeature({
 }
 
 export default function HomePage() {
-  const extensionUrl = process.env.NEXT_PUBLIC_EXTENSION_URL || "#install";
-
   return (
     <main>
       <Header />
@@ -102,9 +100,9 @@ export default function HomePage() {
             <Link href="/new" className="btn-primary">
               New Workspace <ArrowRight className="h-4 w-4" />
             </Link>
-            <a href={extensionUrl} className="btn-secondary">
-              <Puzzle className="h-4 w-4" /> Install Extension
-            </a>
+            <Link href="/download" className="btn-secondary">
+              <Download className="h-4 w-4" /> Download
+            </Link>
           </div>
 
           <p className="mt-5 inline-flex items-center gap-2 text-sm text-white/50">
@@ -247,12 +245,12 @@ export default function HomePage() {
                   titles and URLs.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/new" className="btn-primary">
+                  <Link href="/download" className="btn-primary">
+                    <Download className="h-4 w-4" /> Download the apps
+                  </Link>
+                  <Link href="/new" className="btn-secondary">
                     Paste tabs manually <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <a href={extensionUrl} className="btn-secondary">
-                    <Puzzle className="h-4 w-4" /> Get the extension
-                  </a>
                 </div>
               </div>
               <ol className="space-y-3 text-sm text-muted-foreground">

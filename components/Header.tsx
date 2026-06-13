@@ -11,12 +11,12 @@ export function Header() {
           <span className="text-[0.95rem]">TabZero</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
-          <a
-            href="/#install"
+          <Link
+            href="/download"
             className="hidden rounded-lg px-3 py-1.5 text-muted-foreground transition hover:text-foreground sm:block"
           >
-            Extension
-          </a>
+            Download
+          </Link>
           <Link
             href="/new"
             className="hidden rounded-lg px-3 py-1.5 text-muted-foreground transition hover:text-foreground sm:block"

@@ -1,2 +1,5 @@
-# The Chrome extension lives in the repo but is not part of the web deployment.
+# Bundled in the repo but not part of the web deployment.
 extension
+desktop
+.github
+

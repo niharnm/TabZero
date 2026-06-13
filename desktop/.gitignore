@@ -1,0 +1,6 @@
+node_modules
+src-tauri/target
+src-tauri/gen
+# Icons are generated from a source image during the build (npm run tauri icon).
+src-tauri/icons
+icon-source.png

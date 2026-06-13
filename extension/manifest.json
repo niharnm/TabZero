@@ -5,6 +5,16 @@
   "description": "Turn tab chaos into a plan.",
   "permissions": ["tabs", "storage"],
   "host_permissions": ["http://localhost:3000/*", "https://*.vercel.app/*"],
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*", "https://*.vercel.app/*"],
+      "js": ["assets/content.js"]
+    }
+  ],
   "action": {
     "default_title": "TabZero",
     "default_popup": "index.html"

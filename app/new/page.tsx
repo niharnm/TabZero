@@ -2,9 +2,43 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Lock } from "lucide-react";
+import { ArrowRight, Download, Loader2, Lock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { parseTabsInput } from "@/lib/utils";
+import type { BrowserTab } from "@/lib/types";
+
+const TABZERO_WEB_SOURCE = "tabzero-web";
+const TABZERO_EXTENSION_SOURCE = "tabzero-extension";
+const REQUEST_CURRENT_TABS = "TABZERO_REQUEST_CURRENT_TABS";
+const CURRENT_TABS_RESPONSE = "TABZERO_CURRENT_TABS_RESPONSE";
+
+type TabImportStatus = "idle" | "requesting" | "imported" | "manual";
+
+type ExtensionTabsResponse = {
+  source?: string;
+  type?: string;
+  requestId?: string;
+  ok?: boolean;
+  tabs?: BrowserTab[];
+  error?: string;
+};
+
+function createRequestId() {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function formatTabsForTextarea(tabs: BrowserTab[]) {
+  return tabs
+    .map((tab) => {
+      const title = tab.title?.trim() || tab.url?.trim() || "Untitled tab";
+      const url = tab.url?.trim();
+      return url ? `${title} - ${url}` : title;
+    })
+    .join("\n");
+}
 
 export default function NewWorkspacePage() {
   const router = useRouter();
@@ -13,8 +47,84 @@ export default function NewWorkspacePage() {
   const [raw, setRaw] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tabImportStatus, setTabImportStatus] = useState<TabImportStatus>("idle");
+  const [tabImportMessage, setTabImportMessage] = useState(
+    "Ask your browser for the tabs in this window, or paste them manually below.",
+  );
 
   const parsedCount = useMemo(() => parseTabsInput(raw).length, [raw]);
+
+  async function importCurrentTabs() {
+    setError("");
+    setTabImportStatus("requesting");
+    setTabImportMessage("Waiting for browser access...");
+
+    const requestId = createRequestId();
+
+    try {
+      const tabs = await new Promise<BrowserTab[]>((resolve, reject) => {
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error("Tab access was not granted. Paste your tabs manually below."));
+        }, 2500);
+
+        function cleanup() {
+          window.clearTimeout(timeout);
+          window.removeEventListener("message", handleMessage);
+        }
+
+        function handleMessage(event: MessageEvent<ExtensionTabsResponse>) {
+          if (event.source !== window) return;
+          const data = event.data;
+          if (
+            data?.source !== TABZERO_EXTENSION_SOURCE ||
+            data.type !== CURRENT_TABS_RESPONSE ||
+            data.requestId !== requestId
+          ) {
+            return;
+          }
+
+          cleanup();
+
+          if (!data.ok) {
+            reject(new Error(data.error || "Tab access was declined. Paste your tabs manually below."));
+            return;
+          }
+
+          resolve(data.tabs ?? []);
+        }
+
+        window.addEventListener("message", handleMessage);
+        window.postMessage(
+          {
+            source: TABZERO_WEB_SOURCE,
+            type: REQUEST_CURRENT_TABS,
+            requestId,
+          },
+          window.location.origin,
+        );
+      });
+
+      if (tabs.length === 0) {
+        setTabImportStatus("manual");
+        setTabImportMessage("No http or https tabs were shared. Paste titles or URLs manually below.");
+        return;
+      }
+
+      setRaw(formatTabsForTextarea(tabs));
+      setTabImportStatus("imported");
+      setTabImportMessage(
+        `Imported ${tabs.length} tab${tabs.length === 1 ? "" : "s"} from this browser window.`,
+      );
+    } catch (caught) {
+      setTabImportStatus("manual");
+      setTabImportMessage(
+        caught instanceof Error
+          ? caught.message
+          : "Tab access was not granted. Paste your tabs manually below.",
+      );
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,8 +169,8 @@ export default function NewWorkspacePage() {
             What&apos;s on your screen right now?
           </h1>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            Paste your open tabs and TabZero turns them into groups, priorities,
-            and a focus plan. Only the titles and URLs you enter are analyzed.
+            Let TabZero request your current browser tabs, or paste them manually
+            if you decline. Only submitted titles and URLs are analyzed.
           </p>
         </div>
 
@@ -90,6 +200,37 @@ export default function NewWorkspacePage() {
               />
             </label>
           </div>
+
+          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium">Use tabs from this window</p>
+                <p
+                  className={`mt-1 text-xs ${
+                    tabImportStatus === "imported" ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {tabImportMessage}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={importCurrentTabs}
+                disabled={tabImportStatus === "requesting" || loading}
+                className="btn-secondary shrink-0 disabled:opacity-60"
+              >
+                {tabImportStatus === "requesting" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Requesting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" /> Get current tabs
+                  </>
+                )}
+              </button>
+            </div>
+          </section>
 
           <label className="block">
             <div className="flex items-center justify-between">
