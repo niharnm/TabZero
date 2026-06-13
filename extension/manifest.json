@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "TabZero",
+  "version": "0.1.0",
+  "description": "Turn tab chaos into a plan.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["http://localhost:3000/*", "https://*.vercel.app/*"],
+  "action": {
+    "default_title": "TabZero",
+    "default_popup": "index.html"
+  }
+}

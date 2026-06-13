@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 240 7% 4%;
+  --foreground: 0 0% 98%;
+  --card: 240 6% 7.5%;
+  --card-foreground: 0 0% 98%;
+  --muted: 240 5% 13%;
+  --muted-foreground: 240 5% 58%;
+  --primary: 258 90% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 11%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 258 90% 66%;
+  --accent-foreground: 0 0% 100%;
+  --border: 240 6% 15%;
+  --input: 240 6% 15%;
+  --ring: 258 90% 66%;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em;
+}
+
+/* One restrained purple glow at the top. Flat everywhere else. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    44rem 28rem at 50% -12%,
+    hsl(258 90% 60% / 0.18),
+    transparent 70%
+  );
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.32);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.65);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(240 6% 20%);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(240 6% 28%);
+  background-clip: content-box;
+}
+
+@layer components {
+  /* Flat surface — hairline border, no blur, no glow. The clean baseline. */
+  .glass,
+  .surface {
+    background: hsl(240 6% 7.5%);
+    border: 1px solid hsl(0 0% 100% / 0.07);
+    border-radius: var(--radius);
+  }
+
+  .glass-hover {
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .glass-hover:hover {
+    border-color: hsl(0 0% 100% / 0.14);
+    background: hsl(240 6% 9%);
+  }
+
+  /* Subtle gradient hairline ring for the one or two emphasis surfaces. */
+  .ring-accent {
+    border-color: hsl(var(--primary) / 0.3);
+  }
+
+  /* Buttons — solid, flat, confident. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 11px;
+    padding: 0.7rem 1.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: hsl(var(--primary-foreground));
+    background: hsl(var(--primary));
+    box-shadow: 0 10px 30px -14px hsl(258 90% 55% / 0.7);
+    transition: background 0.16s ease, transform 0.16s ease;
+  }
+  .btn-primary:hover {
+    background: hsl(258 92% 71%);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 11px;
+    padding: 0.7rem 1.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    background: transparent;
+    border: 1px solid hsl(0 0% 100% / 0.12);
+    transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  }
+  .btn-secondary:hover {
+    border-color: hsl(0 0% 100% / 0.22);
+    background: hsl(0 0% 100% / 0.03);
+    transform: translateY(-1px);
+  }
+
+  /* Keyboard cap. */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    padding: 0 0.4rem;
+    border-radius: 6px;
+    border: 1px solid hsl(0 0% 100% / 0.14);
+    background: hsl(0 0% 100% / 0.05);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+  }
+
+  .h-display {
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+  }
+
+  /* Elegant serif display, à la editorial hero. */
+  .font-serif {
+    font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  }
+  .h-serif {
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+
+  /* Inline highlighted token inside a headline. */
+  .mark {
+    position: relative;
+    white-space: nowrap;
+    color: hsl(258 95% 78%);
+  }
+
+  /* Big feature card. */
+  .feature-card {
+    border-radius: 24px;
+    border: 1px solid hsl(0 0% 100% / 0.07);
+    background: linear-gradient(180deg, hsl(240 6% 9%), hsl(240 7% 6.5%));
+    overflow: hidden;
+  }
+  .feature-card--accent {
+    border-color: hsl(var(--primary) / 0.35);
+    background: linear-gradient(165deg, hsl(262 70% 24%), hsl(255 60% 14%) 55%, hsl(248 50% 10%));
+  }
+}
+
+/* Dark aurora bloom for the hero scene. */
+.aurora {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: -18%;
+  height: 78vh;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(64px);
+  opacity: 0.95;
+  background:
+    radial-gradient(38% 46% at 50% 32%, hsl(280 92% 62% / 0.5), transparent 70%),
+    radial-gradient(34% 44% at 28% 58%, hsl(255 92% 60% / 0.45), transparent 70%),
+    radial-gradient(40% 50% at 74% 52%, hsl(320 85% 62% / 0.38), transparent 72%);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+.aurora-veil {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 90vh;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(60% 40% at 50% 0%, transparent 40%, hsl(var(--background)) 78%);
+}
+
+/* Scroll reveal. */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: none;
+}
+.reveal.d1 {
+  transition-delay: 0.07s;
+}
+.reveal.d2 {
+  transition-delay: 0.14s;
+}
+.reveal.d3 {
+  transition-delay: 0.21s;
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translateY(-2%) scale(1);
+  }
+  to {
+    transform: translateY(3%) scale(1.09);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.waveform > span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: center;
+  animation: wave 1.1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.blink {
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
