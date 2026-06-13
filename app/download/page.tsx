@@ -6,7 +6,6 @@ import {
   Check,
   Puzzle,
   Keyboard,
-  ShieldCheck,
   Download,
 } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -100,13 +99,13 @@ export default function DownloadPage() {
                 </div>
               </div>
               <p className="mt-4 text-sm leading-6 text-white/70">
-                A dedicated TabZero window that lives in your menu bar, with a
-                global hotkey to jump straight into a new workspace.
+                A dedicated TabZero window with its own dock icon and a menu-bar
+                shortcut — the full dashboard, without browser-tab clutter.
               </p>
               <ul className="mt-5 space-y-2 text-sm">
                 {[
-                  ["Native window & menu-bar icon", <ShieldCheck key="a" className="h-4 w-4 text-emerald-300" />],
-                  ["Global ⌘⏎ to start a workspace", <Keyboard key="b" className="h-4 w-4 text-emerald-300" />],
+                  ["Native window with its own dock icon", <Apple key="a" className="h-4 w-4 text-emerald-300" />],
+                  ["Menu-bar icon to open or quit anytime", <Keyboard key="b" className="h-4 w-4 text-emerald-300" />],
                   ["Same dashboard, no browser needed", <Check key="c" className="h-4 w-4 text-emerald-300" />],
                 ].map(([t, icon]) => (
                   <li key={t as string} className="flex items-center gap-2 text-white/75">
