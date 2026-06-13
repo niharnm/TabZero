@@ -106,4 +106,5 @@ export type WorkspaceRecord = {
   rawTabs: BrowserTab[];
   analysis: Analysis;
   shareSlug?: string;
+  userId?: string; // owner (when accounts are enabled); absent for anonymous workspaces
 };

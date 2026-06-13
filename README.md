@@ -93,6 +93,7 @@ Run this SQL in the Supabase SQL editor (or via the CLI) to enable persistent st
 ```sql
 create table workspaces (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
   title text not null,
   goal text,
   time_remaining text,
@@ -116,6 +117,43 @@ create table workspace_tasks (
 ```
 
 TabZero writes to `workspaces` (the canonical record, including the full analysis JSON) and mirrors tasks into `workspace_tasks`. Server writes use `SUPABASE_SERVICE_ROLE_KEY`; if you only set the anon key, add row-level security policies that permit the operations you need.
+
+### Row-level security (recommended)
+
+The server uses the service-role key (which bypasses RLS) and scopes every query
+by `user_id`, but enabling RLS is good defense-in-depth:
+
+```sql
+alter table workspaces enable row level security;
+alter table workspace_tasks enable row level security;
+
+-- Owners can read/write their own workspaces.
+create policy "own workspaces" on workspaces
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Anyone can read a workspace that has been shared.
+create policy "public shares" on workspaces
+  for select using (share_slug is not null);
+```
+
+## Accounts & authentication
+
+TabZero uses **Supabase Auth**. Behavior depends on configuration:
+
+| Supabase configured? | Auth |
+| --- | --- |
+| Yes (`NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | **Sign-in required** — `/new`, `/dashboard`, and `/workspace/[id]` are gated; share links stay public. Workspaces are saved to the user's account and listed at `/dashboard`. |
+| No | **Anonymous** — the app works with no login, using file-based storage. |
+
+Sign-in methods: **Google** and **email + password**. To enable them:
+
+1. In Supabase → **Authentication → Providers**, enable **Email** and **Google** (add your Google OAuth client ID/secret).
+2. In Supabase → **Authentication → URL Configuration**, set the **Site URL** to your deployed URL and add redirect URLs:
+   - `https://your-app.vercel.app/auth/callback`
+   - `http://localhost:3000/auth/callback`
+3. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
+
+No extra app env vars are needed — auth uses the same `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The macOS app (which loads the web dashboard) inherits the web session; the Chrome extension uses the public API and can be wired to send a Supabase access token in a follow-up.
 
 ## Deploy to Vercel
 

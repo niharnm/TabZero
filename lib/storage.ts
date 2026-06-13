@@ -14,6 +14,7 @@ import { getSupabaseServer, hasSupabase } from "@/lib/supabase";
 export type CreateWorkspaceInput = {
   rawTabs: BrowserTab[];
   analysis: Analysis;
+  userId?: string;
 };
 
 export function storageBackend(): "supabase" | "file" {
@@ -102,6 +103,7 @@ export async function createWorkspace(
         time_remaining: analysis.timeRemaining ?? null,
         raw_tabs: input.rawTabs,
         analysis,
+        user_id: input.userId ?? null,
       })
       .select()
       .single();
@@ -126,6 +128,7 @@ export async function createWorkspace(
     updatedAt: now,
     rawTabs: input.rawTabs,
     analysis,
+    userId: input.userId,
   };
   memory().workspaces[record.id] = record;
   await flushToDisk();
@@ -263,6 +266,7 @@ type WorkspaceRow = {
   raw_tabs: BrowserTab[] | null;
   analysis: Analysis;
   share_slug: string | null;
+  user_id?: string | null;
 };
 
 function rowToRecord(row: WorkspaceRow): WorkspaceRecord {
@@ -275,7 +279,26 @@ function rowToRecord(row: WorkspaceRow): WorkspaceRecord {
     rawTabs: row.raw_tabs ?? [],
     analysis: row.analysis,
     shareSlug: row.share_slug ?? undefined,
+    userId: row.user_id ?? undefined,
   };
+}
+
+// List a user's workspaces, newest first (for the dashboard).
+export async function listWorkspaces(userId: string): Promise<WorkspaceRecord[]> {
+  if (hasSupabase()) {
+    const supabase = getSupabaseServer()!;
+    const { data, error } = await supabase
+      .from("workspaces")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (!error && data) return data.map(rowToRecord);
+    return [];
+  }
+  await loadFromDisk();
+  return Object.values(memory().workspaces)
+    .filter((w) => w.userId === userId)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
 async function mirrorTasks(workspaceId: string, tasks: Task[]): Promise<void> {

@@ -3,6 +3,7 @@ import { apiHeaders, optionsResponse } from "@/lib/http";
 import { analyzeTabs } from "@/lib/analyzer";
 import { sanitizeTabs } from "@/lib/analyzer/shared";
 import { createWorkspace } from "@/lib/storage";
+import { getUser } from "@/lib/auth/server";
 import type { AnalyzeTabsResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,12 @@ export async function POST(request: Request) {
       typeof body?.timeRemaining === "string" ? body.timeRemaining : undefined;
 
     const { analysis } = await analyzeTabs({ tabs, goal, timeRemaining });
-    const record = await createWorkspace({ rawTabs: tabs, analysis });
+    const user = await getUser();
+    const record = await createWorkspace({
+      rawTabs: tabs,
+      analysis,
+      userId: user?.id,
+    });
 
     const response: AnalyzeTabsResponse = {
       workspaceId: record.id,
