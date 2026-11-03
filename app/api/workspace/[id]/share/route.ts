@@ -1,30 +1,34 @@
 import { NextResponse } from "next/server";
 import { apiHeaders, optionsResponse } from "@/lib/http";
-import { ensureShareSlug } from "@/lib/storage";
+import { ensureShareSlug, getWorkspace } from "@/lib/storage";
+import { denyUnlessCanAccess } from "@/lib/auth/access";
 import { shareUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export function OPTIONS() {
-  return optionsResponse();
+export function OPTIONS(request: Request) {
+  return optionsResponse(request);
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const slug = await ensureShareSlug(id);
+  const workspace = await getWorkspace(id);
+  const denied = await denyUnlessCanAccess(request, workspace?.userId);
+  if (denied) return denied;
+  const slug = workspace ? await ensureShareSlug(id) : null;
 
   if (!slug) {
     return NextResponse.json(
       { error: "Workspace not found." },
-      { status: 404, headers: apiHeaders() },
+      { status: 404, headers: apiHeaders(request) },
     );
   }
 
   return NextResponse.json(
     { slug, url: shareUrl(slug) },
-    { headers: apiHeaders() },
+    { headers: apiHeaders(request) },
   );
 }
