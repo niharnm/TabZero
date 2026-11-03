@@ -1,3 +1,15 @@
+// Content scripts are loaded as classic scripts, so this file must stay
+// self-contained (no imports that would become shared chunks). Keep the
+// allowlist in sync with src/lib/config.ts.
+const ALLOWED_WEB_ORIGINS = new Set<string>(["http://localhost:3000"]);
+try {
+  const configured = import.meta.env.VITE_WEB_APP_URL;
+  if (configured) ALLOWED_WEB_ORIGINS.add(new URL(configured).origin);
+} catch {
+  // malformed build URL: only localhost stays allowed
+}
+const isAllowedWebOrigin = (origin: string) => ALLOWED_WEB_ORIGINS.has(origin);
+
 const TABZERO_WEB_SOURCE = "tabzero-web";
 const TABZERO_EXTENSION_SOURCE = "tabzero-extension";
 const REQUEST_CURRENT_TABS = "TABZERO_REQUEST_CURRENT_TABS";
@@ -12,6 +24,10 @@ type TabsBridgeRequest = {
 
 window.addEventListener("message", (event: MessageEvent<TabsBridgeRequest>) => {
   if (event.source !== window) return;
+  // Only relay for the TabZero web app origin, never for arbitrary pages.
+  if (!isAllowedWebOrigin(window.location.origin) || event.origin !== window.location.origin) {
+    return;
+  }
 
   const request = event.data;
   if (

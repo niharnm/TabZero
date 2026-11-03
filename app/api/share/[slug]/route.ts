@@ -4,13 +4,13 @@ import { getWorkspaceBySlug } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
-export function OPTIONS() {
-  return optionsResponse();
+export function OPTIONS(request: Request) {
+  return optionsResponse(request);
 }
 
 // Public, read-only endpoint for a shared workspace.
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
@@ -19,9 +19,9 @@ export async function GET(
   if (!workspace) {
     return NextResponse.json(
       { error: "Shared workspace not found." },
-      { status: 404, headers: apiHeaders() },
+      { status: 404, headers: apiHeaders(request) },
     );
   }
 
-  return NextResponse.json({ workspace }, { headers: apiHeaders() });
+  return NextResponse.json({ workspace }, { headers: apiHeaders(request) });
 }

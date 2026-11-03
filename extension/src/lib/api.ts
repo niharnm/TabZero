@@ -16,6 +16,7 @@ export async function analyzeTabs(input: {
 }) {
   const response = await fetch(`${WEB_APP_URL}/api/analyze-tabs`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
