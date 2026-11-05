@@ -79,6 +79,9 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
+# Extra origins allowed by API CORS, comma-separated (optional).
+TABZERO_ALLOWED_ORIGINS=
+
 # AI providers (optional). Priority: OpenAI > Gemini > mock analyzer.
 OPENAI_API_KEY=
 GEMINI_API_KEY=
@@ -169,7 +172,7 @@ The app deploys and runs without any environment variables — AI and Supabase s
 
 ## API surface
 
-All routes return JSON and send permissive CORS headers so the Chrome extension can call them cross-origin.
+All routes return JSON. CORS is restricted to `NEXT_PUBLIC_APP_URL` (plus `http://localhost:3000` outside production) and any origins listed in `TABZERO_ALLOWED_ORIGINS` (comma-separated). The Chrome extension is covered by its manifest host permissions and does not need to be listed. When Supabase auth is enabled, `analyze-tabs`, `workspace/[id]`, `workspace/[id]/share` and `tasks/[id]` require a signed-in user and workspace ownership; `share/[slug]` stays public.
 
 | Method | Route | Purpose |
 | --- | --- | --- |
@@ -188,7 +191,7 @@ type AnalyzeTabsRequest = { tabs: BrowserTab[]; goal?: string; timeRemaining?: s
 
 ## Chrome extension
 
-The web API is stable and CORS-enabled, so the extension only needs to POST tabs and open the returned workspace. To wire it up:
+The web API is stable and CORS-restricted (see `TABZERO_ALLOWED_ORIGINS` below), so the extension only needs to POST tabs and open the returned workspace. To wire it up:
 
 1. Build the extension with the web app URL injected:
    ```bash
@@ -203,7 +206,7 @@ The web API is stable and CORS-enabled, so the extension only needs to POST tabs
 4. Read `workspaceId` from the response and open `${VITE_WEB_APP_URL}/workspace/${workspaceId}` in a new tab.
 5. Load the unpacked build for testing: `chrome://extensions` → Developer Mode → **Load unpacked** → select `extension/dist`.
 
-Keep the manifest host permissions aligned with the deployed API origin (e.g. `https://*.vercel.app/*` and `http://localhost:3000/*`).
+The build adds exactly one production origin (`VITE_WEB_APP_URL`) to the manifest's host permissions and content-script matches, next to `http://localhost:3000`. Wildcards such as `https://*.vercel.app/*` must not be used: any page on them could read your tabs through the content-script bridge. The content script and background worker also check the page origin against the same allowlist. The extension sends the web session cookie (`credentials: "include"`) so signed-in accounts own the workspaces it creates.
 
 ## macOS desktop app
 

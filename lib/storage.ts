@@ -205,6 +205,32 @@ export async function ensureShareSlug(id: string): Promise<string | null> {
   return slug;
 }
 
+// Find the workspace (and its owner) a task belongs to, for authorization.
+export async function getTaskOwner(
+  taskId: string,
+): Promise<{ workspaceId: string; userId?: string } | null> {
+  if (hasSupabase()) {
+    const supabase = getSupabaseServer()!;
+    const { data: taskRow } = await supabase
+      .from("workspace_tasks")
+      .select("workspace_id")
+      .eq("id", taskId)
+      .maybeSingle();
+    const workspaceId = taskRow?.workspace_id as string | undefined;
+    if (workspaceId) {
+      const record = await getWorkspace(workspaceId);
+      if (record) return { workspaceId, userId: record.userId };
+    }
+  }
+  await loadFromDisk();
+  for (const record of Object.values(memory().workspaces)) {
+    if (record.analysis.nextTasks.some((t) => t.id === taskId)) {
+      return { workspaceId: record.id, userId: record.userId };
+    }
+  }
+  return null;
+}
+
 export async function toggleTask(
   taskId: string,
   completed: boolean,
